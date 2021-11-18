@@ -3,7 +3,7 @@ stack = []
 done = False
 
 helpText = '''
-The prompt is a single "$" character.
+The prompt is "[n]$", where n is the stack height
 
 The allowed user keywords are:
 
@@ -19,9 +19,12 @@ These binary operators remove the top two elements and push the result
 ["multiply","*"]  : binary multiplication
 ["divide","/"]    : binary division, top element is the denominator
 
+currently this calculator ignores any divisions by 0 with a warning
+
 These keywords cause the program to ignore everything after them
 "help"            : print this help message
 "exit"            : exit program
+EOF               : exit program
 
 Any number of keywords may be input at once, separated by single spaces
 after each entry the top of the stack is printed for convenience
@@ -35,9 +38,13 @@ print(welcome)
 done = False
 
 while not done:
-    print("$ ",end="")
-    args = input().split(" ")
-
+    print("[{n}]$ ".format(n=len(stack)),end="")
+    try :
+        args = input().split(" ")
+    except EOFError:
+        print()
+        exit()
+        
     for a in args:
         isNumeric = True
         try:
@@ -79,10 +86,13 @@ while not done:
                     stack = stack[:-1]
             elif a == "divide" or a == "/":
                 if len(stack) > 1:
-                    stack[-2] /= stack[-1]
-                    if stack[-2] == int(stack[-2]):
-                        stack[-2] = int(stack[-2])
-                    stack = stack[:-1]
+                    if stack[-1] == 0:
+                        print("Attempted to divide by 0")
+                    else:
+                        stack[-2] /= stack[-1]
+                        if stack[-2] == int(stack[-2]):
+                            stack[-2] = int(stack[-2])
+                        stack = stack[:-1]
 
     if len(stack) > 0:
         print(stack[-1])
